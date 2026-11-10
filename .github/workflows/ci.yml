@@ -1,0 +1,29 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: The generated surface is up to date
+        run: python3 tools/generate.py --check
+
+      - name: The committed contract still matches this repo's actions
+        run: python3 tools/sync_contract.py --check-offline
+
+      - name: STMP's own contract has not moved under us
+        run: python3 tools/sync_contract.py --check
+
+      - name: Unit tests
+        env:
+          PYTHONPATH: .:tests
+        run: python3 -m unittest discover -s tests -t tests -v

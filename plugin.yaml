@@ -1,0 +1,51 @@
+name: stmp
+version: 0.1.0
+manifest_version: 2
+api_version: 1
+license: MIT
+homepage: https://github.com/a7madgamal/hermes-stmp
+description: >-
+  Use a phone as the trust boundary: call its Gmail, Calendar, Drive, contacts,
+  notifications, vault and SSH over STMP, where every gated call waits for a human
+  approval on the device and no credential is ever stored on this machine.
+requires_hermes: ">=0.23.0"
+tags:
+  - phone
+  - approvals
+  - secrets
+  - gmail
+  - ssh
+  - android
+
+# The whole point of this plugin. It reads no credential, because there is none
+# to read: the vault, the Google tokens and the SSH keys live on the phone.
+requires_env: []
+
+provides_tools:
+  - stmp_audio
+  - stmp_calendar
+  - stmp_contacts
+  - stmp_debug
+  - stmp_drive
+  - stmp_gmail
+  - stmp_help
+  - stmp_logs
+  - stmp_notifications
+  - stmp_probe
+  - stmp_secrets
+  - stmp_ssh
+  - stmp_tts
+
+config_schema:
+  base_url:
+    type: str
+    required: true
+    description: >-
+      Address of the STMP bridge on your phone, for example http://192.168.1.20:8787
+      or its Tailscale address. The phone must be reachable from this machine.
+  timeout_seconds:
+    type: int
+    default: 75
+    description: >-
+      Per-request timeout. Must exceed the phone's 60 s approval window, so a call
+      that waits for a human fails cleanly instead of hanging.

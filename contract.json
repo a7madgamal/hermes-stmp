@@ -1,0 +1,253 @@
+{
+  "contract_version": 4,
+  "exempt": [
+    "POST /audio/{cue}",
+    "POST /tts"
+  ],
+  "route_count": 37,
+  "source": {
+    "blob_sha256": "d49195ef1163901d0b094c7f37f4c334342340d6fc0961afd4047b257b6a5eca",
+    "path": "app/src/test/java/com/mido/phonebridge/HelpContractTest.kt",
+    "ref": "main",
+    "repo": "a7madgamal/STMP.AI"
+  },
+  "tools": {
+    "stmp_audio": {
+      "actions": {
+        "cue": {
+          "exempt": true,
+          "method": "POST",
+          "path": "/audio/{cue}"
+        }
+      }
+    },
+    "stmp_calendar": {
+      "actions": {
+        "create": {
+          "exempt": false,
+          "method": "POST",
+          "path": "/calendar/events"
+        },
+        "delete": {
+          "exempt": false,
+          "method": "DELETE",
+          "path": "/calendar/events/{id}"
+        },
+        "list": {
+          "exempt": false,
+          "method": "GET",
+          "path": "/calendar/events"
+        },
+        "move": {
+          "exempt": false,
+          "method": "POST",
+          "path": "/calendar/events/{id}/move"
+        },
+        "quickadd": {
+          "exempt": false,
+          "method": "POST",
+          "path": "/calendar/quickadd"
+        },
+        "update": {
+          "exempt": false,
+          "method": "POST",
+          "path": "/calendar/events/{id}"
+        }
+      }
+    },
+    "stmp_contacts": {
+      "actions": {
+        "search": {
+          "exempt": false,
+          "method": "GET",
+          "path": "/contacts"
+        }
+      }
+    },
+    "stmp_debug": {
+      "actions": {
+        "audit_clear": {
+          "exempt": false,
+          "method": "DELETE",
+          "path": "/audit"
+        },
+        "report": {
+          "exempt": false,
+          "method": "GET",
+          "path": "/debug"
+        }
+      }
+    },
+    "stmp_drive": {
+      "actions": {
+        "create_folder": {
+          "exempt": false,
+          "method": "POST",
+          "path": "/drive/files"
+        },
+        "download": {
+          "exempt": false,
+          "method": "GET",
+          "path": "/drive/files/{id}/content"
+        },
+        "get": {
+          "exempt": false,
+          "method": "GET",
+          "path": "/drive/files/{id}"
+        },
+        "list": {
+          "exempt": false,
+          "method": "GET",
+          "path": "/drive/files"
+        },
+        "move": {
+          "exempt": false,
+          "method": "POST",
+          "path": "/drive/files/{id}/move"
+        },
+        "rename": {
+          "exempt": false,
+          "method": "POST",
+          "path": "/drive/files/{id}/rename"
+        },
+        "trash": {
+          "exempt": false,
+          "method": "POST",
+          "path": "/drive/files/{id}/trash"
+        },
+        "upload": {
+          "exempt": false,
+          "method": "POST",
+          "path": "/drive/files/upload"
+        }
+      }
+    },
+    "stmp_gmail": {
+      "actions": {
+        "list": {
+          "exempt": false,
+          "method": "GET",
+          "path": "/gmail/messages"
+        },
+        "modify": {
+          "exempt": false,
+          "method": "POST",
+          "path": "/gmail/messages/{id}/modify"
+        },
+        "profile": {
+          "exempt": false,
+          "method": "GET",
+          "path": "/gmail/profile"
+        },
+        "read": {
+          "exempt": false,
+          "method": "GET",
+          "path": "/gmail/messages/{id}"
+        },
+        "send": {
+          "exempt": false,
+          "method": "POST",
+          "path": "/gmail/messages/send"
+        },
+        "trash": {
+          "exempt": false,
+          "method": "POST",
+          "path": "/gmail/messages/{id}/trash"
+        }
+      }
+    },
+    "stmp_help": {
+      "actions": {
+        "contract": {
+          "exempt": false,
+          "method": "GET",
+          "path": "/help"
+        }
+      }
+    },
+    "stmp_logs": {
+      "actions": {
+        "read": {
+          "exempt": false,
+          "method": "GET",
+          "path": "/logs"
+        }
+      }
+    },
+    "stmp_notifications": {
+      "actions": {
+        "act": {
+          "exempt": false,
+          "method": "POST",
+          "path": "/notifications/{id}/action"
+        },
+        "dismiss": {
+          "exempt": false,
+          "method": "POST",
+          "path": "/notifications/{id}/dismiss"
+        },
+        "list": {
+          "exempt": false,
+          "method": "GET",
+          "path": "/notifications"
+        }
+      }
+    },
+    "stmp_probe": {
+      "actions": {
+        "reach": {
+          "exempt": false,
+          "method": "GET",
+          "path": "/probe"
+        }
+      }
+    },
+    "stmp_secrets": {
+      "actions": {
+        "call": {
+          "exempt": false,
+          "method": "POST",
+          "path": "/secrets/{name}/call"
+        },
+        "get": {
+          "exempt": false,
+          "method": "GET",
+          "path": "/secrets/{name}"
+        },
+        "list": {
+          "exempt": false,
+          "method": "GET",
+          "path": "/secrets"
+        }
+      }
+    },
+    "stmp_ssh": {
+      "actions": {
+        "detach": {
+          "exempt": false,
+          "method": "POST",
+          "path": "/ssh/{name}/detach"
+        },
+        "job": {
+          "exempt": false,
+          "method": "GET",
+          "path": "/ssh/job/{id}"
+        },
+        "run": {
+          "exempt": false,
+          "method": "POST",
+          "path": "/ssh/{name}"
+        }
+      }
+    },
+    "stmp_tts": {
+      "actions": {
+        "speak": {
+          "exempt": true,
+          "method": "POST",
+          "path": "/tts"
+        }
+      }
+    }
+  }
+}
