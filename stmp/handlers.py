@@ -24,6 +24,7 @@ from . import snapshot
 from .bridge import Bridge, BridgeError, Config, ConfigError
 from .dispatch import DISPATCH, EXEMPT
 from .errors import explain
+from .paths import PathRefused, resolve_destination, resolve_source
 
 #: A tool result longer than this is cut with a marker. `/help` and `/debug` are
 #: tens of kilobytes; pasting all of it into the turn costs context and adds
@@ -193,7 +194,11 @@ def run(ctx: Any, tool: str, args: Mapping[str, Any]) -> str:
 
     try:
         config = Config.from_settings(
-            ctx.get_config("base_url", None), ctx.get_config("timeout_seconds", None)
+            ctx.get_config("base_url", None),
+            ctx.get_config("timeout_seconds", None),
+            ctx.get_config("download_dir", None),
+            ctx.get_config("upload_dir", None),
+            ctx.get_config("allow_overwrite", None),
         )
         bridge = Bridge(config)
         expanded = _expand(path, cleaned)
@@ -308,18 +313,29 @@ def _expand(path: str, values: Mapping[str, Any]) -> str:
 
 
 def _upload(bridge: Bridge, method: str, path: str, spec: Spec, values: Mapping[str, Any]) -> str:
-    source = Path(os.path.expanduser(str(values["file_path"])))
-    if not source.is_absolute():
-        raise UsageError(f"file_path must be absolute, got {str(source)!r}")
-    if not source.is_file():
-        raise UsageError(f"file_path is not a readable file: {source}")
+    try:
+        source = resolve_source(bridge.config, values["file_path"])
+    except PathRefused as exc:
+        raise UsageError(str(exc)) from exc
+
     size = source.stat().st_size
     if size > MAX_UPLOAD_BYTES:
         raise UsageError(
             f"file is {size} bytes; this tool uploads at most {MAX_UPLOAD_BYTES} bytes"
         )
 
-    name = values.get("name") or source.name
+    # The approval card shows `name`. Letting the model rename at upload time means
+    # the human can approve a harmless-looking name for a credential file, so the
+    # wire name is always the real one; renaming afterwards stays available through
+    # the drive rename action, where the card shows both names.
+    requested = values.get("name")
+    if requested and str(requested) != source.name:
+        raise UsageError(
+            f"name {str(requested)!r} differs from the file being uploaded ({source.name!r}). "
+            "Upload first, then use action 'rename' so the approval card shows the real file."
+        )
+
+    name = source.name
     content_type = values.get("type") or mimetypes.guess_type(name)[0] or "application/octet-stream"
     query = {"name": name, "type": content_type}
     if values.get("parent"):
@@ -332,20 +348,27 @@ def _upload(bridge: Bridge, method: str, path: str, spec: Spec, values: Mapping[
 
 
 def _download(bridge: Bridge, method: str, path: str, values: Mapping[str, Any]) -> str:
-    target = Path(os.path.expanduser(str(values["save_to"])))
-    if not target.is_absolute():
-        raise UsageError(f"save_to must be absolute, got {str(target)!r}")
-    if target.is_dir():
-        raise UsageError(f"save_to is a directory: {target}")
-    if not target.parent.is_dir():
-        raise UsageError(f"save_to's parent directory does not exist: {target.parent}")
+    try:
+        target = resolve_destination(bridge.config, values["save_to"])
+    except PathRefused as exc:
+        raise UsageError(str(exc)) from exc
 
     payload = bridge.call(method, path, query={})
     if not isinstance(payload, bytes):
         # /drive/files/{id}/content streams bytes; anything else here is a broken
         # expectation, not a file to guess about.
         raise RuntimeError("download route answered with JSON instead of bytes")
-    target.write_bytes(payload)
+
+    # Write beside the target, then rename over it. A partial write must never be
+    # visible under the final name, and `os.replace` is atomic on one filesystem.
+    temp = target.with_name(f".{target.name}.{os.getpid()}.part")
+    try:
+        temp.write_bytes(payload)
+        os.replace(temp, target)
+    finally:
+        if temp.exists():
+            temp.unlink()
+
     return json.dumps(
         {
             "ok": True,

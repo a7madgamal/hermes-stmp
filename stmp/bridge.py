@@ -47,9 +47,23 @@ class ConfigError(Exception):
 class Config:
     base_url: str
     timeout: float
+    #: Where downloads may be written. Empty means the plugin's own data dir.
+    download_dir: str = ""
+    #: Where uploads may be read from. Empty means "anywhere except the denied
+    #: credential stores", which is the default posture and is enforced in paths.py.
+    upload_dir: str = ""
+    #: Whether a download may replace an existing file.
+    allow_overwrite: bool = False
 
     @classmethod
-    def from_settings(cls, base_url: Any, timeout_seconds: Any = None) -> "Config":
+    def from_settings(
+        cls,
+        base_url: Any,
+        timeout_seconds: Any = None,
+        download_dir: Any = None,
+        upload_dir: Any = None,
+        allow_overwrite: Any = None,
+    ) -> "Config":
         """Validate what the user typed, loudly.
 
         A bridge URL that is wrong must fail here with the value in the message,
@@ -95,7 +109,13 @@ class Config:
                 )
 
         origin = f"{parsed.scheme}://{parsed.netloc}"
-        return cls(base_url=origin, timeout=timeout)
+        return cls(
+            base_url=origin,
+            timeout=timeout,
+            download_dir="" if download_dir is None else str(download_dir).strip(),
+            upload_dir="" if upload_dir is None else str(upload_dir).strip(),
+            allow_overwrite=_as_bool(allow_overwrite),
+        )
 
     @property
     def device(self) -> str:
@@ -239,3 +259,17 @@ def _stringify(value: Any) -> str:
     if isinstance(value, bool):
         return "true" if value else "false"
     return str(value)
+
+
+#: What counts as "on" for a boolean setting. Anything else is off, because a
+#: setting that cannot be read must not grant the more permissive behaviour.
+_TRUTHY = frozenset({"1", "true", "yes", "on", "y", "t"})
+
+
+def _as_bool(value: Any) -> bool:
+    """Read a settings value as a boolean, defaulting to False."""
+    if value is None or value == "":
+        return False
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() in _TRUTHY

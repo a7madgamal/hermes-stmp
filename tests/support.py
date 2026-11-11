@@ -27,8 +27,9 @@ class FakeState:
 
 
 class FakeCtx:
-    def __init__(self, base_url: str | None = None, timeout_seconds: int | None = None):
+    def __init__(self, base_url: str | None = None, timeout_seconds: int | None = None, **settings):
         self.settings = {"base_url": base_url, "timeout_seconds": timeout_seconds}
+        self.settings.update(settings)
         self.state = FakeState()
 
     def get_config(self, key: str, default=None):

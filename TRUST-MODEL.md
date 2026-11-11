@@ -76,8 +76,22 @@ a call that waits for a human must fail as "they did not answer", not as
 - No core rebinds: the plugin only calls `ctx.register_tool` and `ctx.register_skill`.
 - No subprocess, no `eval`, no shell. HTTP and JSON from the Python standard library.
 - No self-update: the version installed is the commit pinned in the catalog.
-- No writes outside the paths a user names in a call, and no reads except a file the
-  user names for upload.
+- **Downloads land only inside `download_dir`** (default: this plugin's data folder).
+  `save_to` is resolved relative to it and refused if the result lands outside, which
+  covers `..` and symlinks in one comparison. An existing file is never replaced
+  unless `allow_overwrite` is on, and a partial write never appears under the final
+  name.
+- **Uploads come only from `upload_dir`** when that is set. When it is not, the
+  sources that hold credentials are refused: `~/.ssh`, `~/.gnupg`, `~/.aws`,
+  `~/.config`, `~/.kube`, `~/.docker`, any `.env*` file, and Hermes's own home.
+- The uploaded file's own name is what the phone's card shows: a model-chosen name
+  that differs from the real one is refused, so a credential file cannot be approved
+  under a harmless-looking label. Renaming stays available after upload, where the
+  card shows both names.
+
+This matters because the model chooses both paths: "no writes outside the paths a
+user names" would be false. The settings name the directories; the model only picks
+files inside them.
 
 ## Judging this model yourself
 

@@ -153,12 +153,15 @@ What a user should know before installing, in full:
 
 - **Network.** The plugin talks to exactly one address: the `base_url` you configure.
   There is no other endpoint, no telemetry, no update check.
-- **Reads.** It reads files only when you ask it to upload one (`stmp_drive.upload`)
-  or when it writes a download (`stmp_drive.download`), always to an absolute path
-  you named.
-- **Writes.** Everything that changes state is a gated route: mail, calendar, Drive,
-  notifications, SSH commands. The phone decides whether to ask, and the human
-  decides whether to allow.
+- **Reads.** It reads a local file only for `stmp_drive.upload`, and only from
+  `upload_dir` when that is set. With no `upload_dir`, credential stores are refused
+  (`~/.ssh`, `~/.gnupg`, `~/.aws`, `~/.config`, `~/.kube`, `~/.docker`), along with
+  any `.env*` file and Hermes's own home.
+- **Writes.** A download writes only inside `download_dir` (default: this plugin's
+  data folder), never over an existing file unless `allow_overwrite` is on, and only
+  after the phone approved the read. Everything else that changes state is a gated
+  route: mail, calendar, Drive, notifications, SSH commands. The phone decides
+  whether to ask, and the human decides whether to allow.
 - **Credentials.** None. Not a token, not a key, not a cookie. `requires_env` is
   empty and there is no `oauth:` block, because the credentials this plugin uses
   live on the phone and are never readable from here.

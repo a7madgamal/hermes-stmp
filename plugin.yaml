@@ -1,5 +1,5 @@
 name: stmp
-version: 0.1.0
+version: 0.1.1
 manifest_version: 2
 api_version: 1
 license: MIT
@@ -43,9 +43,31 @@ config_schema:
     description: >-
       Address of the STMP bridge on your phone, for example http://192.168.1.20:8787
       or its Tailscale address. The phone must be reachable from this machine.
+      Prefer an https or tailnet address: the bridge carries mail, Drive files and
+      SSH output, and plain http sends those in the clear.
   timeout_seconds:
     type: int
     default: 75
     description: >-
       Per-request timeout. Must exceed the phone's 60 s approval window, so a call
       that waits for a human fails cleanly instead of hanging.
+  download_dir:
+    type: str
+    required: false
+    description: >-
+      The only directory stmp_drive download may write into. Default: this plugin's
+      own data folder. save_to is resolved relative to it and refused if it lands
+      outside — the model names the file, this setting decides where it may land.
+  upload_dir:
+    type: str
+    required: false
+    description: >-
+      The only directory stmp_drive upload may read from. When unset, uploads are
+      refused from credential stores (~/.ssh, ~/.gnupg, ~/.aws, ~/.config, ~/.kube,
+      ~/.docker), any .env file, and Hermes's own home.
+  allow_overwrite:
+    type: bool
+    default: false
+    description: >-
+      Whether a download may replace a file that already exists in download_dir.
+      Off by default: a model-chosen name must not silently destroy an earlier file.

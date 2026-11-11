@@ -148,16 +148,16 @@ class StreamingTests(TempDirTest):
         payload = b"binary-ish"
         with StubBridge({"GET /drive/files/f1/content": (200, payload, "application/pdf")}) as stub:
             target = self.tmp / "out.pdf"
-            result = json.loads(run(FakeCtx(stub.url), "stmp_drive",
-                                    {"action": "download", "id": "f1", "save_to": str(target)}))
+            result = json.loads(run(FakeCtx(stub.url, download_dir=str(self.tmp)), "stmp_drive",
+                                    {"action": "download", "id": "f1", "save_to": "out.pdf"}))
         self.assertEqual(target.read_bytes(), payload)
         self.assertEqual(result["bytes"], len(payload))
         self.assertEqual(result["sha256"], hashlib.sha256(payload).hexdigest())
 
     def test_download_refuses_a_missing_parent_directory(self):
         with self.assertRaises(UsageError):
-            run(FakeCtx("http://127.0.0.1:1"), "stmp_drive",
-                {"action": "download", "id": "f1", "save_to": str(self.tmp / "no" / "out.pdf")})
+            run(FakeCtx("http://127.0.0.1:1", download_dir=str(self.tmp)), "stmp_drive",
+                {"action": "download", "id": "f1", "save_to": "no/out.pdf"})
 
 
 if __name__ == "__main__":
