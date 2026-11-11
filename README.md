@@ -30,13 +30,15 @@ this work, and the same plugin works against any STMP instance.
 1. Install the STMP app on an Android phone from the
    [releases page](https://github.com/a7madgamal/STMP.AI/releases) (`stmp-v*.apk`).
 2. In the app: start the bridge, sign in to Google if you want the Google routes, and
-   note the bridge address it shows (for example `http://192.168.1.20:8787`, or the
-   phone's Tailscale address).
+   note the bridge address it shows — the phone's Tailscale address or its LAN address.
+   **Prefer the tailnet address, and prefer https if your copy serves it:** this bridge
+   carries mail, Drive files and SSH output, and a plain-`http` LAN address sends all of
+   that readable to anything on the same network.
 3. Install this plugin and point it at that address:
 
    ```bash
    hermes plugins install a7madgamal/hermes-stmp --enable
-   hermes config set plugins.entries.stmp.settings.base_url http://192.168.1.20:8787
+   hermes config set plugins.entries.stmp.settings.base_url http://100.x.y.z:8787
    ```
 
 4. Call `stmp_help`. The first call from a new machine is refused with
