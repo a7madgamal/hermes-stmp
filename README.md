@@ -27,19 +27,54 @@ this work, and the same plugin works against any STMP instance.
 
 ## Install
 
-1. Install the STMP app on an Android phone from the
-   [releases page](https://github.com/a7madgamal/STMP.AI/releases) (`stmp-v*.apk`).
+1. Install the STMP app on the Android phone.
+
+   Download the APK from the [releases page](https://github.com/a7madgamal/STMP.AI/releases).
+   The asset is named `stmp-v<version>.apk` (about 43 MB). Open it on the phone and allow
+   your browser or file manager to install unknown apps when Android asks.
+
+   Four things about that download, because each one is a wasted trip otherwise:
+
+   - **Use the releases list, not "latest".** Every release is published as a pre-release,
+     so `github.com/a7madgamal/STMP.AI/releases/latest` returns 404. Pick the newest entry
+     from the list and download the APK attached to it.
+   - **Android 8.0 or newer, real phone only.** The APK is `arm64-v8a` only, so it will not
+     install on an x86_64 emulator. Every phone this targets is arm64.
+   - **Install over an existing STMP; do not uninstall first.** All releases are signed with
+     the same key, so an upgrade installs cleanly and keeps your rules, caller names and
+     account. A different signing key is a different app identity, which is why the key is
+     pinned in CI.
+   - **If you do uninstall, do not tick "keep app data".** Android deletes the app's
+     Keystore key on uninstall while that checkbox keeps the rest, which leaves a vault that
+     can never be opened; the app will then offer to reset it. Your secrets are gone either
+     way — the kept data only buys you a vault you cannot unlock.
+
+   The app updates itself from this page (Preferences → About & updates). Note that a
+   pre-release is the app's **beta channel**, so the default **stable** channel sees nothing
+   until a release is promoted — check the channel setting before reporting "no update".
 2. In the app: start the bridge, sign in to Google if you want the Google routes, and
    note the bridge address it shows — the phone's Tailscale address or its LAN address.
    **Prefer the tailnet address, and prefer https if your copy serves it:** this bridge
    carries mail, Drive files and SSH output, and a plain-`http` LAN address sends all of
    that readable to anything on the same network.
-3. Install this plugin and point it at that address:
+3. Install this plugin from the Hermes catalog and point it at that address:
 
    ```bash
-   hermes plugins install a7madgamal/hermes-stmp --enable
+   hermes plugins search stmp                              # confirm the entry and its pin
+   hermes plugins install stmp --enable --yes-deps
    hermes config set plugins.entries.stmp.settings.base_url http://100.x.y.z:8787
    ```
+
+   `stmp` is a curated catalog entry (`plugin-catalog/stmp.yaml` in
+   `NousResearch/hermes-agent`), so the name alone resolves and the install checks out
+   one exact commit. `owner/repo` still works, but only the catalog form can be moved
+   forward by `hermes plugins update`, and only the catalog form was reviewed.
+   `--yes-deps` answers the dependency prompt, so the command finishes in one run over
+   SSH or in CI.
+
+   Updates arrive when the catalog pin moves — a new PR against `hermes-agent`, after
+   which `hermes plugins update stmp` fetches it. Pushing to this repository alone does
+   not reach catalog users: the pin, not the branch, is what they install.
 
 4. Call `stmp_help`. The first call from a new machine is refused with
    `caller_unverified`: approve and name that caller on the phone, then retry. This
