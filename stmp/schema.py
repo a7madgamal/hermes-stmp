@@ -14,7 +14,9 @@ from .handlers import SPECS
 
 APPROVAL = (
     "Gated by the phone: unless stated otherwise, the call waits for a human to approve it on "
-    "the device (60 s). An unapproved call returns why, and is never retried."
+    "the device (60 s). An unapproved call returns why, and is never retried — one denial ends "
+    "every attempt at that goal, so do not resend it reworded or by another route. Ask what the "
+    "human wants instead."
 )
 
 TOOL_DOCS: dict[str, str] = {

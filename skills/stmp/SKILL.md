@@ -37,6 +37,37 @@ Two routes are exempt and run without a modal: `stmp_tts` and `stmp_audio`. Thei
 descriptions say so. Never present an exempt call as evidence that a human approved
 anything.
 
+## A denial is a full stop, not a formatting problem
+
+**One `denied` ends every attempt at that goal.** The human pressed the one control
+the gate exists to give them, and there is no correct way to reach the same effect
+anyway. Mido, 2026-11-15, after an agent re-sent the same branch-protection command
+three ways in ten seconds: *"when I reject the gate even once STOP AND FUCKING ASK
+CRITICAL RULE"*.
+
+After a denial, none of these are acceptable:
+
+- sending it again unchanged;
+- resending it reworded, reformatted, or with different flags;
+- splitting it into smaller calls that add up to the same action;
+- reaching the same effect through another route, tool, or plugin;
+- reading the denial as "the payload was unclear" and fixing the payload.
+
+The next step is a question in plain chat: what do they want instead? Then wait.
+A denial usually means "not this" or "not this way", and guessing which one is how
+the same refusal gets repeated.
+
+**A denial is a decision; a breakage is not.** These mean nobody decided anything,
+and retrying them is fine once the cause is named:
+
+- a timeout, or `screen off` / `device locked`;
+- `gate unavailable` — the modal could not be shown at all;
+- a connection that never answered (HTTP 000, refused, DNS);
+- a `5xx` from the bridge itself.
+
+`denied` and `caller_denied` are the two answers that carry a human's judgement.
+Neither is ever retried, and neither is ever worked around.
+
 ## The vault, specifically
 
 `stmp_secrets` never returns a value and has no argument that could ask for one.
