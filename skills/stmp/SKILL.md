@@ -41,9 +41,11 @@ anything.
 
 **One `denied` ends every attempt at that goal.** The human pressed the one control
 the gate exists to give them, and there is no correct way to reach the same effect
-anyway. Mido, 2026-11-15, after an agent re-sent the same branch-protection command
-three ways in ten seconds: *"when I reject the gate even once STOP AND FUCKING ASK
-CRITICAL RULE"*.
+anyway.
+
+This is written from a real failure: an agent was denied a protected-branch command,
+read the denial as "the payload was unclear", reformatted it, and sent it again —
+twice. Three attempts at one decision the human had already made.
 
 After a denial, none of these are acceptable:
 
