@@ -71,10 +71,20 @@ cd "$REPO_DIR"
 
 # The pin must exist on the remote. A local-only commit pins nothing installable,
 # and the weekly dead-repo job would delist the entry for it.
-if ! git ls-remote --exit-code "https://github.com/$PLUGIN_REPO.git" "$SHA" >/dev/null 2>&1; then
-  echo "catalog-pin: $SHA is not on $PLUGIN_REPO. Push the plugin first." >&2
-  exit 1
-fi
+#
+# Asks the commit API rather than `git ls-remote`, which matches ref NAMES: passing a
+# sha to it looks for a ref called that, never finds one, and reports every sha as
+# missing. The API answers for any commit, tip or not.
+HTTP=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 \
+  "https://api.github.com/repos/$PLUGIN_REPO/commits/$SHA")
+case "$HTTP" in
+  200) ;;
+  404) echo "catalog-pin: $SHA is not on $PLUGIN_REPO. Push the plugin first." >&2; exit 1 ;;
+  # Anything else is a failed lookup, not proof of absence. Refusing is the only
+  # honest answer: a network error read as "absent" would block every bump, and read
+  # as "present" would pin something nobody verified.
+  *) echo "catalog-pin: could not confirm $SHA on $PLUGIN_REPO (HTTP $HTTP)." >&2; exit 1 ;;
+esac
 
 git fetch --quiet origin main
 BRANCH="catalog/stmp-$VERSION"
@@ -83,13 +93,17 @@ git checkout -q -B "$BRANCH" origin/main
 sed -i "s|^sha: .*|sha: $SHA|" "$ENTRY"
 sed -i "s|^version: .*|version: \"$VERSION\"|" "$ENTRY"
 
-# Two lines, or the branch is not the change this script claims it is.
-CHANGED=$(git diff --numstat -- "$ENTRY" | awk '{print $1 + $2}')
-[ "$CHANGED" = 2 ] || {
-  echo "catalog-pin: expected a 2-line change in $ENTRY, got $CHANGED." >&2
+# Exactly the two fields, replaced. `--numstat` reports additions and deletions
+# separately, so a replaced line counts in both: two changed fields is 2 and 2, not 2.
+# Anything else means this script edited more than it claims to.
+read -r ADDED DELETED _ <<EOF
+$(git diff --numstat -- "$ENTRY")
+EOF
+if [ "$ADDED" != 2 ] || [ "$DELETED" != 2 ]; then
+  echo "catalog-pin: expected 2 lines replaced in $ENTRY, got +$ADDED/-$DELETED." >&2
   git diff -- "$ENTRY" >&2
   exit 1
-}
+fi
 
 git add "$ENTRY"
 git -c user.name='Ahmed Gamal' -c user.email='eng.a7mad.gamal@gmail.com' \
