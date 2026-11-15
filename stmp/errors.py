@@ -23,9 +23,10 @@ NEXT_STEP = {
     ),
     # --- the approval gate ---
     "denied": (
-        "Nobody approved it: the human declined, or the screen was locked or off so the card "
-        "could never be shown. Do not retry — ask the user whether they want it, and if so "
-        "whether the phone is unlocked."
+        "A human declined, or the screen was locked or off so the card could never be shown. "
+        "Do not retry, and do not resend it reworded or by another route: one denial ends every "
+        "attempt at that goal. Ask the user whether they want it, and if so whether the phone is "
+        "unlocked."
     ),
     "timeout": (
         "The request outlived the approval window. Nobody was at the phone in time. Do not "
