@@ -18,9 +18,14 @@
 #   tools/catalog-pin.sh <sha>           # pin to an exact commit
 #   tools/catalog-pin.sh <sha> <version> # override the version label too
 #
-# The checkout lives at ~/code/hermes-agent: shallow, blob-filtered, sparse to
-# plugin-catalog/ (23 MB rather than 1.5 GB), because this repository only ever
-# changes one file in it.
+# The checkout lives at ~/code/hermes-agent: full worktree, history cut to the last
+# 50 commits. The full history is 1.2 GB of 72,982 commits this repository never
+# reads — an entry bump compares two files and needs none of it. 50 commits keeps
+# `git log`/`git blame` useful for the neighbouring entries and costs about 2 MB
+# over `--depth 1`.
+#
+# Re-shallow it when it drifts:
+#   git -C ~/code/hermes-agent fetch --depth 50 origin main
 
 set -e
 
@@ -31,8 +36,8 @@ ENTRY="plugin-catalog/stmp.yaml"
 [ -d "$REPO_DIR/.git" ] || {
   echo "catalog-pin: $REPO_DIR is not a git checkout." >&2
   echo "catalog-pin: create it with:" >&2
-  echo "  git clone --depth 1 --filter=blob:none --sparse https://github.com/NousResearch/hermes-agent.git ~/code/hermes-agent" >&2
-  echo "  cd ~/code/hermes-agent && git sparse-checkout set plugin-catalog" >&2
+  echo "  git clone --depth 50 --single-branch --branch main https://github.com/NousResearch/hermes-agent.git ~/code/hermes-agent" >&2
+  echo "  cd ~/code/hermes-agent && git remote add fork git@github.com-ahmedrocks:a7madgamal/hermes-agent.git" >&2
   exit 1
 }
 
